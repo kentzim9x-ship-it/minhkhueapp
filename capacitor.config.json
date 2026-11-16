@@ -1,0 +1,13 @@
+{
+  "appId": "com.minhkhue.app",
+  "appName": "MINHKHUE",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "never"
+  },
+  "plugins": {
+    "StatusBar": {
+      "overlaysWebView": true
+    }
+  }
+}
