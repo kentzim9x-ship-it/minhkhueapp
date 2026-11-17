@@ -225,6 +225,62 @@ async function handleRouteChange() {
   }
 }
 
+function handleCustomerInputChange(inputEl, moduleName) {
+  const raw = (inputEl.value || '').trim();
+
+  // 1. Trường hợp người dùng xóa trống ô khách hàng
+  if (!raw) {
+    if (moduleName === 'quotations') {
+      handleCustomerSelectInQuotation('');
+    } else if (moduleName === 'sales-orders') {
+      handleCustomerSelectInOrder('');
+    } else if (moduleName === 'returns') {
+      updateField('customer', '');
+      render();
+    }
+    return;
+  }
+
+  // 2. Tìm khách hàng khớp trong danh mục db.customers
+  const customers = db.customers || [];
+  const matched = customers.find(c =>
+    `${c.id} - ${c.name}`.toLowerCase() === raw.toLowerCase() ||
+    (c.id || '').trim().toLowerCase() === raw.toLowerCase() ||
+    (c.name || '').trim().toLowerCase() === raw.toLowerCase()
+  );
+
+  // 3. Nếu KHÔNG khớp danh mục -> Báo lỗi, xóa trắng và reset form
+  if (!matched) {
+    alert(`Khách hàng "${raw}" không tồn tại trong danh mục! Vui lòng chọn từ danh sách gợi ý.`);
+    inputEl.value = '';
+    if (moduleName === 'quotations') {
+      handleCustomerSelectInQuotation('');
+    } else if (moduleName === 'sales-orders') {
+      handleCustomerSelectInOrder('');
+    } else if (moduleName === 'returns') {
+      updateField('customer', '');
+      render();
+    }
+    setTimeout(() => {
+      const el = document.getElementById(inputEl.id);
+      if (el) el.focus();
+    }, 50);
+    return;
+  }
+
+  // 4. Nếu hợp lệ -> Chuẩn hóa hiển thị "Mã - Tên" và gọi hàm xử lý gốc (truyền matched.name)
+  inputEl.value = `${matched.id} - ${matched.name}`;
+
+  if (moduleName === 'quotations') {
+    handleCustomerSelectInQuotation(matched.name);
+  } else if (moduleName === 'sales-orders') {
+    handleCustomerSelectInOrder(matched.name);
+  } else if (moduleName === 'returns') {
+    updateField('customer', matched.name);
+    render();
+  }
+}
+
 // BẬT / TẮT HIỆU ỨNG KHỐI NỀN VÀ LOADING
 function triggerLoginTilesHover(active) {
   const screen = document.querySelector('.trim-login-screen');
@@ -297,6 +353,9 @@ async function handleLogin(e) {
 
       document.querySelector('.app-container').style.display = 'flex';
       updateUserInfoUI();
+      if (typeof initIOSLocalNotifications === 'function') {
+        initIOSLocalNotifications(); // Hiện popup xin quyền thông báo trên iPhone
+      }
 
       await Promise.resolve(navigate('dashboard', 'list'));
 
@@ -1533,6 +1592,29 @@ async function handleCustomerSelectInOrder(customerName) {
   render();
 }
 
+function handleNotificationClick(notifId, targetView, itemId) {
+  markNotifIdAsRead(notifId);
+
+  const dropdown = document.getElementById('notif-dropdown');
+  if (dropdown) dropdown.classList.remove('open');
+
+  closeNotificationHistory();
+
+  // Tìm bản ghi thông báo đầy đủ trong db.notifications
+  const notifObj = (db.notifications || []).find(n => String(n.id) === String(notifId));
+
+  // Nếu là yêu cầu nhận bảng báo giá từ web -> Mở Drawer form yêu cầu
+  if (notifObj && notifObj.type === 'quotations_web_require') {
+    openWebQuotationRequestDrawer(notifObj);
+    return;
+  }
+
+  // Các loại thông báo khác giữ nguyên luồng cũ
+  if (targetView && itemId && targetView !== 'null' && itemId !== 'null') {
+    navigate(targetView, 'view', itemId);
+  }
+}
+
 function getSalesAnalyticsData() {
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
@@ -1859,6 +1941,20 @@ async function exportQuotationToPDF() {
   const toDateVN = formatDateVN(d.validUntil || d.validuntil);
   const items = (d.lineItems || d.lineitems || []);
 
+  // Kiểm tra nếu khách hàng là CUS-0008 - Khách Lẻ -> Lấy tên hiển thị theo Ghi chú
+  const rawCust = (d.customer || '').trim();
+  const matchedCust = (db.customers || []).find(c =>
+    String(c.id || '').trim().toUpperCase() === 'CUS-0008' &&
+    (rawCust.toLowerCase() === (c.name || '').trim().toLowerCase() || rawCust.toUpperCase().includes('CUS-0008'))
+  );
+  const isKhachLe = rawCust.toUpperCase().includes('CUS-0008') ||
+    rawCust.toLowerCase() === 'khách lẻ' ||
+    Boolean(matchedCust);
+
+  const displayCustomer = (isKhachLe && (d.notes || '').trim())
+    ? d.notes.trim()
+    : rawCust;
+
   let totalQty = 0;
   let totalAmount = 0;
 
@@ -1939,7 +2035,7 @@ async function exportQuotationToPDF() {
 
     <table style="width: 100%; font-size: 10.5pt; margin-bottom: 8px; border-collapse: collapse; line-height: 1.5;">
       <tr>
-        <td style="width: 50%; padding: 1px 0; vertical-align: top;">Khách hàng: ${d.customer || ''}</td>
+        <td style="width: 50%; padding: 1px 0; vertical-align: top;">Khách hàng: ${displayCustomer}</td>
         <td style="width: 50%; padding: 1px 0; text-align: left; vertical-align: top;">Bảng báo giá: ${d.id || ''}</td>
       </tr>
       <tr>
@@ -2887,6 +2983,7 @@ function initPrintLabelDrawerUI() {
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(2px);
     z-index: 9998;
+    opacity: 0;
     transition: opacity 0.3s ease;
   `;
   overlay.onclick = closePrintLabelDrawer;
@@ -2895,15 +2992,16 @@ function initPrintLabelDrawerUI() {
   drawer.id = 'print-label-drawer';
   drawer.style.cssText = `
     position: fixed;
-    top: 0; right: -33.33vw;
+    top: 0; right: 0;
     width: 33.33vw; height: 100vh;
     background: var(--card, #141821);
     border-left: 1px solid var(--border, rgba(255,255,255,0.1));
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
     z-index: 9999;
-    display: flex;
+    display: none;
     flex-direction: column;
-    transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     font-family: var(--font-jost, sans-serif);
     box-sizing: border-box;
   `;
@@ -2926,20 +3024,25 @@ function openPrintLabelDrawer() {
   renderPrintLabelDrawerContent();
 
   overlay.style.display = 'block';
-  setTimeout(() => {
-    drawer.style.right = '0';
-  }, 10);
+  drawer.style.display = 'flex';
+
+  requestAnimationFrame(() => {
+    overlay.style.opacity = '1';
+    drawer.style.transform = 'translateX(0)';
+  });
 }
 
 function closePrintLabelDrawer() {
   const drawer = document.getElementById('print-label-drawer');
   const overlay = document.getElementById('print-label-overlay');
-  if (drawer) drawer.style.right = '-33.33vw';
-  if (overlay) {
-    setTimeout(() => {
-      overlay.style.display = 'none';
-    }, 300);
-  }
+
+  if (drawer) drawer.style.transform = 'translateX(100%)';
+  if (overlay) overlay.style.opacity = '0';
+
+  setTimeout(() => {
+    if (drawer) drawer.style.display = 'none';
+    if (overlay) overlay.style.display = 'none';
+  }, 300);
 }
 
 function renderPrintLabelDrawerContent() {
