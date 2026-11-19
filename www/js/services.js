@@ -289,7 +289,7 @@ function showAlert(message, title = 'Thông báo hệ thống') {
     titleEl.innerText = title;
     msgEl.innerText = message;
     btnCancel.style.display = 'none';
-    btnConfirm.innerText = 'ĐÃ HỂU';
+    btnConfirm.innerText = 'ĐÃ HIỂU';
 
     overlay.style.display = 'flex';
 
@@ -1038,6 +1038,7 @@ async function submitWebQuotationRequest(e) {
   if (state.view === 'quotations' && state.mode === 'add' && state.formData) {
     state.formData.customer = defaultCustomerName;
     state.formData.notes = noteStr;
+    state.formData.webRequestInfo = (document.getElementById('web-req-items')?.value || '').trim() || '';
     render();
   }
 }
