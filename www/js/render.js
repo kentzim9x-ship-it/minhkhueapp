@@ -1678,11 +1678,13 @@ function renderMaterialForm(c) {
               <label class="form-label">Tên sản phẩm *</label>
               <input 
                   type="text" 
+                  id="m-name" 
                   class="form-input" 
                   value="${d.name || ''}" 
                   ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : `
                     oninput="this.value = toTitleCase(this.value); updateField('name', this.value.trim());"
                     onchange="this.value = toTitleCase(this.value.trim()); updateField('name', this.value.trim());"
+                    onkeydown="handleSec1Enter(event, \'m-unit\')"
                   `} 
                   placeholder="Nhập tên sản phẩm..." 
                   required
@@ -1692,11 +1694,13 @@ function renderMaterialForm(c) {
               <label class="form-label">Đơn vị tính *</label>
               <input 
                 type="text" 
+                id="m-unit" 
                 class="form-input" 
                 value="${d.unit || ''}" 
                 ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : `
                   oninput="this.value = toUpperCaseStr(this.value); updateField('unit', this.value.trim());"
                   onchange="this.value = toUpperCaseStr(this.value.trim()); updateField('unit', this.value.trim());"
+                  onkeydown="handleSec1Enter(event, \'m-category\')"
                 `} 
                 placeholder="CÁI, HỘP, BỘ, KG..." 
                 required
@@ -1704,7 +1708,7 @@ function renderMaterialForm(c) {
             </div>
             <div class="form-group">
               <label class="form-label">Danh mục</label>
-              <select class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'category\', this.value)"'}>
+              <select id="m-category" class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'m-location\')" onchange="updateField(\'category\', this.value)"'}>
                 ${['Hoa quả', 'Rau củ', 'Khác'].map(cat => `<option value="${cat}" ${d.category === cat ? 'selected' : ''}>${cat}</option>`).join('')}
               </select>
             </div>
@@ -1719,25 +1723,26 @@ function renderMaterialForm(c) {
           <div class="section-body grid-4">
             <div class="form-group">
               <label class="form-label">Vị trí lưu kho</label>
-              <input type="text" class="form-input" value="${d.location || ''}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'location\', this.value.trim())"'} placeholder="Ví dụ: A-12-03">
+              <input id="m-location" type="text" class="form-input" value="${d.location || ''}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'m-stock\')" onchange="updateField(\'location\', this.value.trim())"'} placeholder="Ví dụ: A-12-03">
             </div>
             <div class="form-group">
               <label class="form-label">Tồn kho ban đầu</label>
               <input 
                 type="number" 
+                id="m-stock" 
                 step="any" 
                 inputmode="decimal" 
                 class="form-input" 
                 value="${d.stock ?? 0}" 
-                ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'stock\', this.value, \'number\')"'}>
+                ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'m-reorder\')" onchange="updateField(\'stock\', this.value, \'number\')"'}>
             </div>
             <div class="form-group">
               <label class="form-label">Mức định mức</label>
-              <input type="number" step="any" inputmode="decimal" class="form-input" value="${d.reorder ?? 0}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'reorder\', this.value, \'number\')"'} >
+              <input id="m-reorder" type="number" step="any" inputmode="decimal" class="form-input" value="${d.reorder ?? 0}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'m-cost\')" onchange="updateField(\'reorder\', this.value, \'number\')"'} >
             </div>
             <div class="form-group">
               <label class="form-label">Đơn giá (VNĐ)</label>
-              <input type="number" step="any" inputmode="numeric" class="form-input" value="${d.cost ?? 0}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'cost\', this.value, \'number\')"'} >
+              <input id="m-cost" type="number" step="any" inputmode="numeric" class="form-input" value="${d.cost ?? 0}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, null)" onchange="updateField(\'cost\', this.value, \'number\')"'} >
             </div>
           </div>
         </div>
@@ -1778,35 +1783,37 @@ function renderCustomerForm(c) {
           <div class="section-body grid-3">
             <div class="form-group" style="grid-column: span 2;">
               <label class="form-label">Tên công ty / Khách hàng *</label>
-              <input type="text" class="form-input" value="${d.name || ''}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : `
+              <input id="name" type="text" class="form-input" value="${d.name || ''}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : `
                 oninput="this.value = toTitleCase(this.value); updateField('name', this.value.trim());"
                 onchange="this.value = toTitleCase(this.value.trim()); updateField('name', this.value.trim());"
+                onkeydown="handleSec1Enter(event, \'c-type\')"
               `} placeholder="Nhập tên công ty hoặc tên khách hàng..." required>
             </div>
             <div class="form-group">
               <label class="form-label">Loại khách hàng</label>
-              <select class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'type\', this.value)"'}>
+              <select id="c-type" class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'c-contact\')" onchange="updateField(\'type\', this.value)"'}>
                 ${['Khách vãng lai', 'Khách hàng tiềm năng', 'Khách hàng trung thành', 'Khách hàng cũ', 'Khách hàng tiêu cực'].map(t => `<option value="${t}" ${d.type === t ? 'selected' : ''}>${t}</option>`).join('')}
               </select>
             </div>
             <div class="form-group">
               <label class="form-label">Người liên hệ</label>
-              <input type="text" class="form-input" value="${d.contact || ''}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : `
+              <input id="c-contact" type="text" class="form-input" value="${d.contact || ''}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : `
                 oninput="this.value = toTitleCase(this.value); updateField('contact', this.value);"
                 onchange="this.value = toTitleCase(this.value.trim()); updateField('contact', this.value.trim());"
+                onkeydown="handleSec1Enter(event, \'c-email\')"
               `} placeholder="Tên người đại diện...">
             </div>
             <div class="form-group">
               <label class="form-label">Email</label>
-              <input type="email" class="form-input" value="${d.email || ''}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'email\', this.value.trim())"'} placeholder="example@domain.com">
+              <input id="c-email" type="email" class="form-input" value="${d.email || ''}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'c-phone\')" onchange="updateField(\'email\', this.value.trim())"'} placeholder="example@domain.com">
             </div>
             <div class="form-group">
               <label class="form-label">Số điện thoại</label>
-              <input type="tel" inputmode="tel" class="form-input" value="${d.phone || ''}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'phone\', this.value.trim())"'} placeholder="090x xxx xxx">
+              <input id="c-phone" type="tel" inputmode="tel" class="form-input" value="${d.phone || ''}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'c-address\')" onchange="updateField(\'phone\', this.value.trim())"'} placeholder="090x xxx xxx">
             </div>
             <div class="form-group" style="grid-column: span 3;">
               <label class="form-label">Địa chỉ</label>
-              <input type="text" class="form-input" value="${d.address || ''}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'address\', this.value.trim())"'} placeholder="Nhập địa chỉ trụ sở/giao hàng...">
+              <input id="c-address" type="text" class="form-input" value="${d.address || ''}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'c-creditLimit\')" onchange="updateField(\'address\', this.value.trim())"'} placeholder="Nhập địa chỉ trụ sở/giao hàng...">
             </div>
           </div>
         </div>
@@ -1819,17 +1826,17 @@ function renderCustomerForm(c) {
           <div class="section-body grid-3">
             <div class="form-group">
               <label class="form-label">Hạn mức tín dụng (VNĐ)</label>
-              <input type="number" step="any" inputmode="numeric" class="form-input" value="${d.creditLimit ?? 0}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'creditLimit\', this.value, \'number\')"'} >
+              <input id="c-creditLimit" type="number" step="any" inputmode="numeric" class="form-input" value="${d.creditLimit ?? 0}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'c-paymentTerms\')" onchange="updateField(\'creditLimit\', this.value, \'number\')"'} >
             </div>
             <div class="form-group">
               <label class="form-label">Điều khoản thanh toán</label>
-              <select class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'paymentTerms\', this.value)"'}>
+              <select id="c-paymentTerms" class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'c-status\')" onchange="updateField(\'paymentTerms\', this.value)"'}>
                 ${['Thanh toán ngay', 'Thanh toán gối đầu', 'Thanh toán cuối tháng', 'Net 30', 'Net 60'].map(t => `<option value="${t}" ${d.paymentTerms === t ? 'selected' : ''}>${t}</option>`).join('')}
               </select>
             </div>
             <div class="form-group">
               <label class="form-label">Trạng thái</label>
-              <select class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'status\', this.value)"'}>
+              <select id="c-status" class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, null)" onchange="updateField(\'status\', this.value)"'}>
                 <option value="active" ${d.status === 'active' ? 'selected' : ''}>Đang hoạt động</option>
                 <option value="inactive" ${d.status === 'inactive' ? 'selected' : ''}>Ngừng hoạt động</option>
                 <option value="suspended" ${d.status === 'suspended' ? 'selected' : ''}>Tạm khóa</option>
@@ -1878,11 +1885,11 @@ function renderWarehouseForm(c) {
             </div>
             <div class="form-group" style="grid-column: span 2;">
               <label class="form-label">Tên kho *</label>
-              <input type="text" class="form-input" value="${d.name || ''}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onchange="this.value = this.value.trim(); updateField(\'name\', this.value.trim())"'} placeholder="Nhập tên kho hàng..." required>
+              <input id="w-name" type="text" class="form-input" value="${d.name || ''}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'w-location\')" onchange="this.value = this.value.trim(); updateField(\'name\', this.value.trim())"'} placeholder="Nhập tên kho hàng..." required>
             </div>
             <div class="form-group" style="grid-column: span 3;">
               <label class="form-label">Địa chỉ / Vị trí *</label>
-              <input type="text" class="form-input" value="${d.location || ''}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onchange="this.value = this.value.trim(); updateField(\'location\', this.value.trim())"'} placeholder="Nhập địa chỉ kho hàng..." required>
+              <input id="w-location" type="text" class="form-input" value="${d.location || ''}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'w-capacity\')" onchange="this.value = this.value.trim(); updateField(\'location\', this.value.trim())"'} placeholder="Nhập địa chỉ kho hàng..." required>
             </div>
           </div>
         </div>
@@ -1895,19 +1902,19 @@ function renderWarehouseForm(c) {
           <div class="section-body grid-4">
             <div class="form-group">
               <label class="form-label">Sức chứa (Đơn vị)</label>
-              <input type="number" step="any" inputmode="decimal" class="form-input" value="${d.capacity ?? 0}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'capacity\', this.value, \'number\')"'} >
+              <input id="w-capacity" type="number" step="any" inputmode="decimal" class="form-input" value="${d.capacity ?? 0}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'w-used\')" onchange="updateField(\'capacity\', this.value, \'number\')"'} >
             </div>
             <div class="form-group">
               <label class="form-label">Đã sử dụng</label>
-              <input type="number" step="any" inputmode="decimal" class="form-input" value="${d.used ?? 0}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'used\', this.value, \'number\')"'} >
+              <input id="w-used" type="number" step="any" inputmode="decimal" class="form-input" value="${d.used ?? 0}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'w-manager\')" onchange="updateField(\'used\', this.value, \'number\')"'} >
             </div>
             <div class="form-group">
               <label class="form-label">Quản lý kho</label>
-              <input type="text" class="form-input" value="${d.manager || ''}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onchange="this.value = this.value.trim(); updateField(\'manager\', this.value.trim())"'} placeholder="Tên quản lý kho...">
+              <input id="w-manager" type="text" class="form-input" value="${d.manager || ''}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'w-status\')" onchange="this.value = this.value.trim(); updateField(\'manager\', this.value.trim())"'} placeholder="Tên quản lý kho...">
             </div>
             <div class="form-group">
               <label class="form-label">Trạng thái</label>
-              <select class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'status\', this.value)"'}>
+              <select id="w-status" class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, null)" onchange="updateField(\'status\', this.value)"'}>
                 <option value="active" ${d.status === 'active' ? 'selected' : ''}>Đang hoạt động</option>
                 <option value="maintenance" ${d.status === 'maintenance' ? 'selected' : ''}>Bảo trì</option>
                 <option value="closed" ${d.status === 'closed' ? 'selected' : ''}>Đóng cửa</option>
@@ -2048,7 +2055,7 @@ function renderQuotationForm(c) {
                   value="${quotationCustomerDisplay}" 
                   ${(isView || isEdit)
       ? 'readonly style="background: var(--muted); cursor: not-allowed;"'
-      : 'onchange="handleCustomerInputChange(this, \'quotations\')"'
+      : 'onkeydown="handleSec1Enter(event, \'q-date\')" onchange="handleCustomerInputChange(this, \'quotations\')"'
     } 
                   placeholder="-- Chọn hoặc gõ mã / tên khách hàng --" 
                   required
@@ -2059,19 +2066,19 @@ function renderQuotationForm(c) {
               </div>
               <div class="form-group">
                 <label class="form-label">Ngày lập phiếu *</label>
-                <input type="date" class="form-input" value="${d.date || getTodayDateStr()}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'date\', this.value)"'} required>
+                <input type="date" id="q-date" class="form-input" value="${d.date || getTodayDateStr()}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'q-begindate\')" onchange="updateField(\'date\', this.value)"'} required>
               </div>
               <div class="form-group">
                 <label class="form-label">Ngày bắt đầu *</label>
-                <input type="date" class="form-input" value="${d.validbegin || d.validBegin || getFirstDayOfMonthStr()}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'validbegin\', this.value)"'} required>
+                <input type="date" id="q-begindate" class="form-input" value="${d.validbegin || d.validBegin || getFirstDayOfMonthStr()}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'q-untildate\')" onchange="updateField(\'validbegin\', this.value)"'} required>
               </div>
               <div class="form-group">
                 <label class="form-label">Ngày kết thúc *</label>
-                <input type="date" class="form-input" value="${d.validUntil || d.validuntil || ''}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'validUntil\', this.value)"'} required>
+                <input type="date" id="q-untildate" class="form-input" value="${d.validUntil || d.validuntil || ''}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'q-status\')" onchange="updateField(\'validUntil\', this.value)"'} required>
               </div>
               <div class="form-group">
                 <label class="form-label">Trạng thái</label>
-                <select class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'status\', this.value)"'}>
+                <select id="q-status" class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'q-notes\')" onchange="updateField(\'status\', this.value)"'}>
                   <option value="accepted" ${['accepted', 'approved', 'Duyệt'].includes(d.status) ? 'selected' : ''}>Duyệt</option>
                   <option value="pending" ${['pending', 'draft', 'bản nháp', 'Chờ Duyệt'].includes(d.status) || !d.status ? 'selected' : ''}>Chờ Duyệt</option>
                   <option value="rejected" ${['rejected', 'Từ Chối'].includes(d.status) ? 'selected' : ''}>Từ Chối</option>
@@ -2095,7 +2102,7 @@ function renderQuotationForm(c) {
 
               <div class="form-group" style="grid-column: span 3; margin-top: 6px;">
                 <label class="form-label">Ghi chú</label>
-                <textarea class="form-textarea" rows="2" style="resize: vertical; ${isView ? 'background: var(--muted); cursor: not-allowed;' : ''}" ${isView ? 'readonly' : 'onchange="updateField(\'notes\', this.value)"'} placeholder="Nhập thông tin ghi chú (tùy chọn)...">${d.notes || ''}</textarea>
+                <textarea id="q-notes" class="form-textarea" rows="2" style="resize: vertical; ${isView ? 'background: var(--muted); cursor: not-allowed;' : ''}" ${isView ? 'readonly' : 'onkeydown="handleSec1Enter(event, null)" onchange="updateField(\'notes\', this.value)"'} placeholder="Nhập thông tin ghi chú (tùy chọn)...">${d.notes || ''}</textarea>
               </div>
 
               <!-- DÒNG THÔNG TIN MẶT HÀNG CẦN BÁO GIÁ TỪ WEB -->
@@ -2140,12 +2147,7 @@ function renderQuotationForm(c) {
               </div>
             </div>
 
-            <!-- CẤU TRÚC PHÍA DƯỚI: NÚT THÊM DÒNG THẲNG HÀNG MÃ HÀNG & CÙNG HÀNG NGANG VỚI TẠM TÍNH -->
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 26px 10px 26px; flex-wrap: wrap; gap: 12px;">
-              <!-- Khung chứa nút Thêm Dòng: Chiều rộng cố định khớp đúng cột Mã hàng -->
-              <div style="width: 110px; flex-shrink: 0;">
-                ${getAddLineButton('quotations', isDetailsDisabled, 'footer')}
-              </div>
+            <div style="display: flex; justify-content: flex-end; align-items: flex-start; padding: 10px 26px 10px 26px; flex-wrap: wrap; gap: 12px;">
               <div style="display: flex; flex-direction: column; gap: 6px; min-width: 260px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; height: 36px;"><span class="form-label" style="margin:0;">Tạm tính</span><span style="font-family: var(--font-dm-mono);">${fmtUSD(d.subtotal)}</span></div>
                 <div style="display: flex; justify-content: space-between;"><span class="form-label">Chiết khấu</span><span style="font-family: var(--font-dm-mono);">-${fmtUSD(d.discountTotal)}</span></div>
@@ -2399,7 +2401,7 @@ function renderSalesOrderForm(c) {
                   value="${orderCustomerDisplay}" 
                   ${(isView || isEdit)
       ? 'readonly style="background: var(--muted); cursor: not-allowed;"'
-      : 'onchange="handleCustomerInputChange(this, \'sales-orders\')"'
+      : 'onkeydown="handleSec1Enter(event, \'so-warehouse\')" onchange="handleCustomerInputChange(this, \'sales-orders\')"'
     } 
                   placeholder="-- Chọn hoặc gõ mã / tên khách hàng --" 
                   required
@@ -2411,17 +2413,17 @@ function renderSalesOrderForm(c) {
               </div>
               <div class="form-group">
                 <label class="form-label">Mã kho (Xuất kho) *</label>
-                <select class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'warehouseCode\', this.value)"'} required>
+                <select id="so-warehouse" class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'so-date\')" onchange="updateField(\'warehouseCode\', this.value)"'} required>
                   ${warehouseOptions}
                 </select>
               </div>                                     
               <div class="form-group">
                 <label class="form-label">Ngày lập phiếu *</label>
-                <input type="date" class="form-input" value="${d.date || getTodayDateStr()}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'date\', this.value)"'} required>
+                <input type="date" id="so-date" class="form-input" value="${d.date || getTodayDateStr()}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'so-status\')" onchange="updateField(\'date\', this.value)"'} required>
               </div>
               <div class="form-group">
                 <label class="form-label">Trạng thái</label>
-                <select class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'status\', this.value)"'}>
+                <select id="so-status" class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'so-notes\')" onchange="updateField(\'status\', this.value)"'}>
                   <option value="completed" ${d.status && ['completed', 'hoàn thành'].includes((d.status || '').toLowerCase()) ? 'selected' : ''}>Hoàn thành</option>
                   <option value="accepted" ${(!d.status || ['accepted', 'approved', 'duyệt', 'đã duyệt'].includes((d.status || '').toLowerCase())) ? 'selected' : ''}>Duyệt</option>
                   <option value="pending" ${d.status && ['pending', 'chờ duyệt', 'processing', 'đang xử lý'].includes((d.status || '').toLowerCase()) ? 'selected' : ''}>Chờ duyệt</option>
@@ -2430,7 +2432,7 @@ function renderSalesOrderForm(c) {
               </div>
               <div class="form-group" style="grid-column: span 3;">
                 <label class="form-label">Ghi chú</label>
-                <textarea class="form-textarea" rows="2" style="resize: vertical; ${isView ? 'background: var(--muted); cursor: not-allowed;' : ''}" ${isView ? 'readonly' : 'onchange="updateField(\'notes\', this.value)"'} placeholder="Nhập ghi chú đơn hàng (tùy chọn)...">${d.notes || ''}</textarea>
+                <textarea id="so-notes" class="form-textarea" rows="2" style="resize: vertical; ${isView ? 'background: var(--muted); cursor: not-allowed;' : ''}" ${isView ? 'readonly' : 'onkeydown="handleSec1Enter(event, null)" onchange="updateField(\'notes\', this.value)"'} placeholder="Nhập ghi chú đơn hàng (tùy chọn)...">${d.notes || ''}</textarea>
               </div>
             </div>
           </div>
@@ -2465,12 +2467,7 @@ function renderSalesOrderForm(c) {
               </div>
             </div>
 
-            <!-- CẤU TRÚC PHÍA DƯỚI: NÚT THÊM DÒNG THẲNG HÀNG MÃ HÀNG & CÙNG HÀNG NGANG VỚI TẠM TÍNH -->
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 26px 10px 26px; flex-wrap: wrap; gap: 12px;">
-              <!-- Khung chứa nút Thêm Dòng: Chiều rộng cố định khớp đúng cột Mã hàng -->
-              <div style="width: 110px; flex-shrink: 0;">
-                ${getAddLineButton('sales-orders', isDetailsDisabled, 'footer')}
-              </div>
+            <div style="display: flex; justify-content: flex-end; align-items: flex-start; padding: 10px 26px 10px 26px; flex-wrap: wrap; gap: 12px;">
               <div style="display: flex; flex-direction: column; gap: 6px; min-width: 260px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; height: 36px;"><span class="form-label" style="margin:0;">Tạm tính</span><span style="font-family: var(--font-dm-mono);">${fmtUSD(d.subtotal)}</span></div>
                 <div style="display: flex; justify-content: space-between;"><span class="form-label">Chiết khấu</span><span style="font-family: var(--font-dm-mono);">-${fmtUSD(d.discountTotal)}</span></div>
@@ -2630,7 +2627,7 @@ function renderReturnForm(c) {
                 value="${returnCustomerDisplay}" 
                 ${(isView || isEdit || hasOrder)
       ? 'readonly style="background: var(--muted); cursor: not-allowed;"'
-      : 'onchange="handleCustomerInputChange(this, \'returns\')"'
+      : 'onkeydown="handleSec1Enter(event, \'ret-warehouse\')" onchange="handleCustomerInputChange(this, \'returns\')"'
     } 
                 placeholder="-- Chọn hoặc gõ mã / tên khách hàng --" 
                 required
@@ -2641,23 +2638,23 @@ function renderReturnForm(c) {
             </div>
             <div class="form-group">
               <label class="form-label">Mã kho *</label>
-              <select class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'warehouseCode\', this.value)"'} required>
+              <select id="ret-warehouse" class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'ret-reason\')" onchange="updateField(\'warehouseCode\', this.value)"'} required>
                 ${warehouseOptions}
               </select>
             </div>
             <div class="form-group">
               <label class="form-label">Lý do *</label>
-              <select class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'reason\', this.value)"'}>
+              <select id="ret-reason" class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'ret-date\')" onchange="updateField(\'reason\', this.value)"'}>
                 ${['Hàng lỗi/hỏng', 'Giao nhầm sản phẩm', 'Đặt hàng thừa', 'Hủy đơn hàng', 'Hư hỏng do vận chuyển', 'Khác'].map(w => `<option value="${w}" ${d.reason === w ? 'selected' : ''}>${w}</option>`).join('')}
               </select>
             </div>
             <div class="form-group">
               <label class="form-label">Ngày đổi trả *</label>
-              <input type="date" class="form-input" value="${d.date || getTodayDateStr()}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'date\', this.value)"'} required>
+              <input type="date" id="ret-date" class="form-input" value="${d.date || getTodayDateStr()}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'ret-status\')" onchange="updateField(\'date\', this.value)"'} required>
             </div>
             <div class="form-group">
               <label class="form-label">Trạng thái</label>
-              <select class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'status\', this.value)"'}>                                                      
+              <select id="ret-status" class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'ret-notes\')" onchange="updateField(\'status\', this.value)"'}>                                                      
                 <option value="completed" ${d.status && ['completed', 'hoàn thành', 'đã xử lý'].includes((d.status || '').toLowerCase()) ? 'selected' : ''}>Hoàn thành</option>
                 <option value="accepted" ${(!d.status || ['accepted', 'duyệt', 'đã duyệt'].includes((d.status || '').toLowerCase())) ? 'selected' : ''}>Duyệt</option>
                 <option value="pending" ${d.status && ['pending', 'chờ duyệt'].includes((d.status || '').toLowerCase()) ? 'selected' : ''}>Chờ duyệt</option>
@@ -2666,7 +2663,7 @@ function renderReturnForm(c) {
             </div>
             <div class="form-group" style="grid-column: span 3;">
               <label class="form-label">Ghi chú nhập tay</label>
-              <textarea class="form-textarea" rows="2" style="resize: vertical; ${isView ? 'background: var(--muted); cursor: not-allowed;' : ''}" ${isView ? 'readonly' : 'onchange="updateField(\'notes\', this.value)"'} placeholder="Nhập ghi chú chi tiết...">${d.notes || ''}</textarea>
+              <textarea id="ret-notes" class="form-textarea" rows="2" style="resize: vertical; ${isView ? 'background: var(--muted); cursor: not-allowed;' : ''}" ${isView ? 'readonly' : 'onkeydown="handleSec1Enter(event, null)" onchange="updateField(\'notes\', this.value)"'} placeholder="Nhập ghi chú chi tiết...">${d.notes || ''}</textarea>
             </div>
           </div>
         </div>
@@ -2697,11 +2694,7 @@ function renderReturnForm(c) {
             </div>
           </div>
 
-          <!-- NÚT THÊM DÒNG RỘNG BẰNG CỘT MÃ HÀNG VÀ THẲNG HÀNG DỌC -->
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 26px 10px 26px; flex-wrap: wrap; gap: 12px;">
-              <div style="width: 110px; flex-shrink: 0;">
-                ${getAddLineButton('returns', isDetailsDisabled, 'footer')}
-              </div>
+            <div style="display: flex; justify-content: flex-end; align-items: center; padding: 10px 26px 10px 26px; flex-wrap: wrap; gap: 12px;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 8px; min-width: 260px; height: 36px;"><span class="form-label" style="font-weight: 600; margin:0;">Tổng hoàn tiền</span><span style="font-family: var(--font-dm-mono); font-size: 15px; color: #f87171; font-weight: 500;">${fmtUSD(d.total)}</span></div>
           </div>
         </div>
@@ -2817,12 +2810,13 @@ function renderGRNForm(c) {
             <div class="form-group" style="grid-column: span 2;">
               <label class="form-label">Nhà cung cấp *</label>
               <input 
-                  type="text" 
-                  class="form-input" 
+                  type="text"
+                  id="g-customer"
+                  class="form-input"
                   value="${d.supplier || ''}" 
                   ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : `
                     oninput="this.value = toTitleCase(this.value); updateField('supplier', this.value.trim());" 
-                    onblur="if(this.value.trim()) render();"
+                    onkeydown="handleSec1Enter(event, \'g-warehouse\')"
                     onchange="this.value = toTitleCase(this.value.trim()); updateField('supplier', this.value.trim()); render();"
                   `} 
                   placeholder="Nhập tên nhà cung cấp..." 
@@ -2831,17 +2825,17 @@ function renderGRNForm(c) {
             </div>
             <div class="form-group">
               <label class="form-label">Mã kho *</label>
-              <select class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'warehouseCode\', this.value)"'} required>
+              <select id="g-warehouse" class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'g-date\')" onchange="updateField(\'warehouseCode\', this.value)"'} required>
                 ${warehouseOptions}
               </select>
             </div>
             <div class="form-group">
               <label class="form-label">Ngày nhập kho *</label>
-              <input type="date" class="form-input" value="${d.date || getTodayDateStr()}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'date\', this.value)"'} required>
+              <input id="g-date" type="date" class="form-input" value="${d.date || getTodayDateStr()}" ${isView ? 'readonly style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'g-status\')" onchange="updateField(\'date\', this.value)"'} required>
             </div>
             <div class="form-group">
               <label class="form-label">Trạng thái</label>
-              <select class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onchange="updateField(\'status\', this.value)"'}>
+              <select id="g-status" class="form-select" ${isView ? 'disabled style="background: var(--muted); cursor: not-allowed;"' : 'onkeydown="handleSec1Enter(event, \'g-notes\')" onchange="updateField(\'status\', this.value)"'}>
                 <option value="Đã nhận" ${d.status === 'Đã nhận' || d.status === 'received' ? 'selected' : ''}>Đã nhận</option>
                 <option value="Bản nháp" ${d.status === 'Bản nháp' || d.status === 'draft' ? 'selected' : ''}>Bản nháp</option>
                 <option value="Đã xác minh" ${d.status === 'Đã xác minh' || d.status === 'verified' ? 'selected' : ''}>Đã xác minh</option>
@@ -2849,7 +2843,7 @@ function renderGRNForm(c) {
             </div>
             <div class="form-group" style="grid-column: span 3;">
               <label class="form-label">Ghi chú</label>
-              <textarea class="form-textarea" rows="2" style="resize: vertical; ${isView ? 'background: var(--muted); cursor: not-allowed;' : ''}" ${isView ? 'readonly' : 'onchange="updateField(\'notes\', this.value)"'} placeholder="Nhập ghi chú phiếu nhập kho...">${d.notes || ''}</textarea>
+              <textarea id="g-notes" class="form-textarea" rows="2" style="resize: vertical; ${isView ? 'background: var(--muted); cursor: not-allowed;' : ''}" ${isView ? 'readonly' : 'onkeydown="handleSec1Enter(event, null)" onchange="updateField(\'notes\', this.value)"'} placeholder="Nhập ghi chú phiếu nhập kho...">${d.notes || ''}</textarea>
             </div>
           </div>
         </div>
@@ -2880,12 +2874,7 @@ function renderGRNForm(c) {
             </div>
           </div>
 
-          <!-- BỐ TRÍ KHU VỰC TỔNG TIỀN VÀ NÚT THÊM DÒNG TRÊN PC -->
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 26px 10px 26px; flex-wrap: wrap; gap: 12px;">
-            <div style="width: 110px; flex-shrink: 0;">
-              ${getAddLineButton('grn', isDetailsDisabled, 'footer')}
-            </div>
-
+          <div style="display: flex; justify-content: flex-end; align-items: center; padding: 10px 26px 10px 26px; flex-wrap: wrap; gap: 12px;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 8px; min-width: 260px; height: 36px;">
               <span class="form-label" style="font-weight: 600; margin: 0;">Tổng giá trị</span>
               <span style="font-family: var(--font-dm-mono); font-size: 15px; color: var(--primary); font-weight: 500;">${fmtUSD(d.totalValue)}</span>
@@ -3660,103 +3649,21 @@ function renderReportSales(c) {
   });
 }
 
-function getAddLineButton(moduleName, isDetailsDisabled, position) {
-  if (state.mode === 'view' || isDetailsDisabled) return '';
+function handleSec1Enter(e, nextId) {
+  if (e.key === 'Enter') {
+    // Riêng ô Ghi chú (textarea): cho phép bấm Shift + Enter để xuống dòng bình thường
+    if (e.target.tagName === 'TEXTAREA' && e.shiftKey) return;
 
-  const isMobile = window.innerWidth <= 768;
+    e.preventDefault(); // Chặn hành vi submit form mặc định khi ấn Enter
 
-  if (position === 'header' && !isMobile) return '';
-  if (position === 'footer' && isMobile) return '';
-
-  // SỬA: Đặt width: 100% để lấp đầy container 90px phía ngoài
-  const buttonStyle = position === 'footer'
-    ? 'width: 100%; height: 36px; padding: 0 4px; justify-content: center; box-sizing: border-box; font-size: 13px;'
-    : '';
-
-  return `
-    <button type="button" class="btn-action btn-add-line-${position}" onclick="addLineItem('${moduleName}')" style="display: inline-flex; align-items: center; gap: 4px; ${buttonStyle}">
-      ${Icons.plus} Thêm dòng
-    </button>
-  `;
-}
-
-function getSortedMaterialsForOrder(customerName, orderDateStr) {
-  const materials = JSON.parse(JSON.stringify(db.materials || []));
-  const currentCust = (customerName || '').trim().toLowerCase();
-  const currentDate = orderDateStr || getTodayDateStr();
-
-  // Hàm bổ trợ so sánh mã SKU tăng dần
-  const sortBySkuAsc = (a, b) => (a.id || '').localeCompare(b.id || '', undefined, { numeric: true, sensitivity: 'base' });
-
-  // 1. Tìm Báo giá có trạng thái "Duyệt" và còn hiệu lực của Khách hàng
-  let activeQuotation = null;
-  if (currentCust) {
-    activeQuotation = (db.quotations || [])
-      .filter(q => {
-        if (!q || !q.customer) return false;
-        if (q.customer.trim().toLowerCase() !== currentCust) return false;
-
-        const status = (q.status || '').toLowerCase();
-        const isAccepted = ['accepted', 'approved', 'duyệt', 'đã duyệt'].includes(status);
-        if (!isAccepted) return false;
-
-        const vBegin = q.validbegin || q.validBegin || q.date || '';
-        const vUntil = q.validUntil || q.validuntil || '';
-
-        if (vBegin && vUntil) {
-          return currentDate >= vBegin && currentDate <= vUntil;
-        }
-        return true;
-      })
-      .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))[0];
-  }
-
-  // 2. Trường hợp KHÔNG có báo giá hợp lệ -> Trả về danh sách sản phẩm gốc
-  if (!activeQuotation || !Array.isArray(activeQuotation.lineItems) || activeQuotation.lineItems.length === 0) {
-    return materials.sort(sortBySkuAsc);
-  }
-
-  // 3. Trường hợp CÓ báo giá hợp lệ: Map đơn giá từ Báo Giá vào Sản phẩm
-  const quoteItemMap = {};
-  activeQuotation.lineItems.forEach(item => {
-    const sku = (item.sku || '').trim().toLowerCase();
-    const name = (item.name || '').trim().toLowerCase();
-    const price = (item.unitPrice !== undefined && item.unitPrice !== null) ? Number(item.unitPrice) : 0;
-
-    if (sku) quoteItemMap[`sku:${sku}`] = price;
-    if (name) quoteItemMap[`name:${name}`] = price;
-  });
-
-  const inQuotationList = [];
-  const outQuotationList = [];
-
-  materials.forEach(m => {
-    const matSku = (m.id || '').trim().toLowerCase();
-    const matName = (m.name || '').trim().toLowerCase();
-
-    const hasInQuote = (matSku && quoteItemMap[`sku:${matSku}`] !== undefined) ||
-      (matName && quoteItemMap[`name:${matName}`] !== undefined);
-
-    if (hasInQuote) {
-      // LẤY ĐƠN GIÁ ĐANG KHAI BÁO TRONG BÁO GIÁ ĐỂ GHI ĐÈ GIÁ DANH MỤC
-      const quotedPrice = (matSku && quoteItemMap[`sku:${matSku}`] !== undefined)
-        ? quoteItemMap[`sku:${matSku}`]
-        : quoteItemMap[`name:${matName}`];
-
-      m.price = quotedPrice;
-      m.cost = quotedPrice; // Đảm bảo Datalist lấy đúng giá Báo giá (VD: 34.000 đ)
-      m.isQuoted = true;    // Đánh dấu thẻ "★ Báo giá"
-
-      inQuotationList.push(m);
+    if (nextId) {
+      const nextEl = document.getElementById(nextId);
+      if (nextEl) {
+        nextEl.focus();
+      }
     } else {
-      outQuotationList.push(m);
+      // Nếu là ô cuối cùng (Ghi chú) -> Mất focus
+      e.target.blur();
     }
-  });
-
-  // Sắp xếp từng nhóm theo SKU tăng dần
-  inQuotationList.sort(sortBySkuAsc);
-  outQuotationList.sort(sortBySkuAsc);
-
-  // Ghép nhóm trong Báo giá (mang giá Báo giá) lên trước, các mặt hàng khác phía sau
-  return [...inQuotationList, ...outQuotationList];
+  }
 }
